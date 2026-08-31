@@ -92,5 +92,32 @@ namespace controleEstoque.Controllers
 
             return Ok(new { sucesso = true, produtoAtualizado = produtoParaAtualizar, mensagem = "Produto atualizado com sucesso."});
         }
+
+        [HttpDelete("deletarProduto")]
+        public async Task<IActionResult> DeletarProduto(int id)
+        {
+            //Simulando lista de produtos
+            List<requestModel> produtosTeste = new List<requestModel>
+            {
+                new requestModel { nome = "Produto A", categoria = "Categoria 1", preco = "R$ 10,00", quantidade = 5 },
+                new requestModel { nome = "Produto A v2", categoria = "Categoria 1", preco = "R$ 12,00", quantidade = 10 },
+                new requestModel { nome = "Produto B", categoria = "Categoria 2", preco = "R$ 20,00", quantidade = 3 },
+                new requestModel { nome = "Produto C", categoria = "Categoria 1", preco = "R$ 15,00", quantidade = 8 }
+            };
+
+            //Como ID 1 corresponde ao índice 0 ( 1 - 1 =  0)
+            int indice = id - 1;
+
+            if (indice < 0 || indice >= produtosTeste.Count)
+            {
+                return NotFound(new { sucesso = false, mensagem = "Produto não encontrado." });
+            }
+
+            // Remove o produto da lista
+            produtosTeste.RemoveAt(indice);
+
+            return Ok(new { sucesso = true, mensagem = "Produto deletado com sucesso." });
+
+        }
     }
 }
