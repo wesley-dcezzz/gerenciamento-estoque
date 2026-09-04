@@ -15,18 +15,8 @@ namespace controleEstoque.Validators
                 .NotEmpty().WithMessage("A categoria do produto é obrigatória.");
 
             RuleFor(x => x.preco)
-                .NotEmpty().WithMessage("O preço é obrigatório.")
-                .Must(precoStr =>
-                {
-                    if (string.IsNullOrEmpty(precoStr)) return false;
-
-                    //Lógica de limpeza da string do preço
-                    string precoLimpo = precoStr.Replace("R$", "").Replace(" ", "").Replace(".", "").Replace(",", ".").Trim();
-
-                    //Tenta converter para decimal
-                    return decimal.TryParse(precoLimpo, out decimal precoDecimal) && precoDecimal > 0;
-                })
-                .WithMessage("o preço informado é inválido ou menor que zero");
+                .GreaterThan(0)
+                .WithMessage("O preço do produto deve ser maior que zero.");
         }
     }
 }

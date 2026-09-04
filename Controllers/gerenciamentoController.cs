@@ -1,4 +1,5 @@
 ﻿using controleEstoque.Models;
+using controleEstoque.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -10,35 +11,39 @@ namespace controleEstoque.Controllers
     public class gerenciamentoController : ControllerBase
     {
 
+        private readonly gerenciamentoService _gerenciamentoService;
+
+        public gerenciamentoController(gerenciamentoService gerenciamentoService)
+        {
+            _gerenciamentoService = gerenciamentoService;
+        }
+
         [HttpPost("cadastrarProduto")]
         public async Task<IActionResult> CadastrarProduto([FromBody] requestModel request)
         {
-            string precoLimpo = request.preco?.Replace("R$", "").Replace(" ", "").Replace(".", "").Replace(",", ".").Trim();
-            bool precoValido = decimal.TryParse(precoLimpo, out decimal precoDecimal);
+            //verifica erros de validação gerados pelo DataAnnotations no model (validator)
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            return Created(string.Empty, new { sucesso = true, mensagem = $"O Produto {request.nome} foi cadastrado com sucesso." });
+            try
+            {
+                var result = await _gerenciamentoService.CadastrarAsync(request);
+                return Ok(result);
+            }
+            catch(InvalidOperationException ex)
+            {
+                return BadRequest(new { mensagem = ex.Message });
+            }
         }
 
         [HttpGet("filtrarNome")]
         public async Task<IActionResult> FiltrarNome([FromQuery] string nome)
         {
-            if (string.IsNullOrEmpty(nome?.Trim()))
-            {
-                return BadRequest(new { sucesso = false, mensagem = "Nome inválido." });
-            }
+            var result = nome;
 
-            List<requestModel> produtosTeste = new List<requestModel>
-            {
-                new requestModel { nome = "Produto A", categoria = "Categoria 1", preco = "R$ 10,00", quantidade = 5 },
-                new requestModel { nome = "Produto A v2", categoria = "Categoria 1", preco = "R$ 12,00", quantidade = 10 },
-                new requestModel { nome = "Produto B", categoria = "Categoria 2", preco = "R$ 20,00", quantidade = 3 },
-                new requestModel { nome = "Produto C", categoria = "Categoria 1", preco = "R$ 15,00", quantidade = 8 }
-            };
-
-            // Filtra os produtos pelo nome
-            var produtosFiltrados = produtosTeste.Where(p => p.nome != null && p.nome.Contains(nome, StringComparison.OrdinalIgnoreCase)).ToList();
-
-            return Ok(new { sucesso = true, produtos = produtosFiltrados, mensagem = "Produtos filtrados com sucesso." });
+            return Ok(new { sucesso = true, mensagem = $"Filtrando produtos pelo nome: {result}" });
         }
 
         [HttpGet("filtrarCategoria")]
@@ -49,75 +54,23 @@ namespace controleEstoque.Controllers
                 return BadRequest(new { sucesso = false, mensagem = "Categoria inválida." });
             }
 
-            List<requestModel> produtosTeste = new List<requestModel>
-            {
-                new requestModel { nome = "Produto A", categoria = "Categoria 1", preco = "R$ 10,00", quantidade = 5 },
-                new requestModel { nome = "Produto A v2", categoria = "Categoria 1", preco = "R$ 12,00", quantidade = 10 },
-                new requestModel { nome = "Produto B", categoria = "Categoria 2", preco = "R$ 20,00", quantidade = 3 },
-                new requestModel { nome = "Produto C", categoria = "Categoria 1", preco = "R$ 15,00", quantidade = 8 }
-            };
-
-            var produtosFiltrados = produtosTeste.Where(p => p.categoria != null && p.categoria.Contains(categoria, StringComparison.OrdinalIgnoreCase)).ToList();
-
-            return Ok(new { sucesso = true, produtos = produtosFiltrados, mensagem = "Produtos filtrados com sucesso." });
+            var result = categoria;
+            return Ok(result);
         }
 
         [HttpPut("editarProduto")]
         public async Task<IActionResult> EditarProduto(int id, [FromBody] requestModel request)
         {
+            var result = id;
 
-            //simulando lista de produtos sem ID
-            List<requestModel> produtosTeste = new List<requestModel>
-            {
-                new requestModel { nome = "Produto A", categoria = "Categoria 1", preco = "R$ 10,00", quantidade = 5 },
-                new requestModel { nome = "Produto A v2", categoria = "Categoria 1", preco = "R$ 12,00", quantidade = 10 },
-                new requestModel { nome = "Produto B", categoria = "Categoria 2", preco = "R$ 20,00", quantidade = 3 },
-                new requestModel { nome = "Produto C", categoria = "Categoria 1", preco = "R$ 15,00", quantidade = 8 }
-            };
-
-            //Como ID 1 corresponde ao índice 0 ( 1 - 1 =  0)
-            int indice = id - 1;
-
-            if (indice < 0 || indice >= produtosTeste.Count)
-            {
-                return NotFound(new { sucesso = false, mensagem = "Produto não encontrado." });
-            }
-
-            //atualiza os dados da lista com o que veio da Request
-            var produtoParaAtualizar = produtosTeste[indice];
-            produtoParaAtualizar.nome = request.nome;
-            produtoParaAtualizar.categoria = request.categoria;
-            produtoParaAtualizar.preco = request.preco;
-            produtoParaAtualizar.quantidade = request.quantidade;
-
-            return Ok(new { sucesso = true, produtoAtualizado = produtoParaAtualizar, mensagem = "Produto atualizado com sucesso."});
+            return Ok(new { sucesso = true, mensagem = $"Editando produto com ID: {result}" });
         }
 
         [HttpDelete("deletarProduto")]
         public async Task<IActionResult> DeletarProduto(int id)
         {
-            //Simulando lista de produtos
-            List<requestModel> produtosTeste = new List<requestModel>
-            {
-                new requestModel { nome = "Produto A", categoria = "Categoria 1", preco = "R$ 10,00", quantidade = 5 },
-                new requestModel { nome = "Produto A v2", categoria = "Categoria 1", preco = "R$ 12,00", quantidade = 10 },
-                new requestModel { nome = "Produto B", categoria = "Categoria 2", preco = "R$ 20,00", quantidade = 3 },
-                new requestModel { nome = "Produto C", categoria = "Categoria 1", preco = "R$ 15,00", quantidade = 8 }
-            };
-
-            //Como ID 1 corresponde ao índice 0 ( 1 - 1 =  0)
-            int indice = id - 1;
-
-            if (indice < 0 || indice >= produtosTeste.Count)
-            {
-                return NotFound(new { sucesso = false, mensagem = "Produto não encontrado." });
-            }
-
-            // Remove o produto da lista
-            produtosTeste.RemoveAt(indice);
-
-            return Ok(new { sucesso = true, mensagem = "Produto deletado com sucesso." });
-
+            var result = id;
+            return Ok(id);
         }
     }
 }
