@@ -22,7 +22,7 @@ Uma API RESTful desenvolvida em ASP.NET Core utilizando Entity Framework Core pa
 1. Clone este repositório em sua máquina:
    
   ```bash
-  git clone [https://github.com/wesley-dcezzz/controleEstoque.git](https://github.com/wesley-dcezzz/controleEstoque.git)
+  git clone https://github.com/wesley-dcezzz/controleEstoque.git
  ```
 2. Abra o projeto em sua IDE de preferência (como o Visual Studio ou Visual Studio Code).
 
