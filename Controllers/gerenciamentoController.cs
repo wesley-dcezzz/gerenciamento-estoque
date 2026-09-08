@@ -78,9 +78,19 @@ namespace controleEstoque.Controllers
         [HttpPut("editarProduto")]
         public async Task<IActionResult> EditarProduto(int id, [FromBody] requestModel request)
         {
-            var result = id;
-
-            return Ok(new { sucesso = true, mensagem = $"Editando produto com ID: {result}" });
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                var result = await _gerenciamentoService.EditarProdutoAsync(id, request);
+                return Ok(result);
+            }
+            catch(InvalidOperationException ex)
+            {
+                return BadRequest(new { sucesso = false, mensagem = ex.Message });
+            }
         }
 
         [HttpDelete("deletarProduto")]

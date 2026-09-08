@@ -111,5 +111,35 @@ namespace controleEstoque.Services
 
             return responseList;
         }
+
+        public async Task<ResponseModel> EditarProdutoAsync(int id, requestModel request)
+        {
+            var produtoEntity = await _context.Produtos.FindAsync(id);
+
+            if (produtoEntity == null)
+            {
+                //Lança uma exceção caso o produto não exista no banco de dados
+                throw new InvalidOperationException("Produto não encontrado! Alteração não permitida.");
+            }
+
+            //Atualiza os dados do produto
+            produtoEntity.Nome = request.nome;
+            produtoEntity.Categoria = request.categoria;
+            produtoEntity.Preco = request.preco;
+            produtoEntity.Quantidade = request.quantidade;
+
+            //salva as alterações no banco de dados
+            await _context.SaveChangesAsync();
+
+            //retorna o produto alterado
+            return new ResponseModel
+            {
+                id = produtoEntity.Id,
+                nome = produtoEntity.Nome,
+                categoria = produtoEntity.Categoria,
+                preco = produtoEntity.Preco,
+                quantidade = produtoEntity.Quantidade
+            };
+        }
     }
 }
