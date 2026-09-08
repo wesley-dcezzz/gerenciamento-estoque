@@ -64,9 +64,15 @@ namespace controleEstoque.Controllers
             {
                 return BadRequest(new { sucesso = false, mensagem = "Categoria inválida." });
             }
-
-            var result = categoria;
-            return Ok(result);
+            try
+            {
+                var result = await _gerenciamentoService.FiltrarCategoriaAsync(categoria);
+                return Ok(result);
+            }
+            catch(InvalidOperationException ex)
+            {
+                return BadRequest(new { sucesso = false, mensagem = ex.Message });
+            }
         }
 
         [HttpPut("editarProduto")]

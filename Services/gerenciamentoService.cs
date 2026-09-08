@@ -83,5 +83,33 @@ namespace controleEstoque.Services
             
             return responseList;
         }
+
+        public async Task<List<ResponseModel>> FiltrarCategoriaAsync(string categoria)
+        {
+            var produtosEncontrados = await _context.Produtos.Where(p => p.Categoria.ToLower().Contains(categoria.ToLower())).ToListAsync();
+
+            if (produtosEncontrados == null || produtosEncontrados.Count == 0)
+            {
+                //Lança uma exceção caso o produto não exista no banco de dados
+                throw new InvalidOperationException("Produto não encontrado.");
+            }
+
+            //Retorna uma lista do tipo responseModel com os dados encontrados
+            var responseList = new List<ResponseModel>();
+
+            foreach (var produto in produtosEncontrados)
+            {
+                responseList.Add(new ResponseModel
+                {
+                    id = produto.Id,
+                    nome = produto.Nome,
+                    categoria = produto.Categoria,
+                    preco = produto.Preco,
+                    quantidade = produto.Quantidade
+                });
+            }
+
+            return responseList;
+        }
     }
 }
