@@ -18,7 +18,7 @@ namespace controleEstoque.Services
 
         public async Task<ResponseModel> CadastrarAsync(requestModel request)
         {
-            //Verifica se o produto já existe no banco de dados, utilizando o mesmo nome
+            //Verifica se o produto já existe no banco de dados, utilizando o mesmo nome (precisa ser exatamente igual ao nome digitado)
             bool produtoExiste = await _context.Produtos.AnyAsync(p => p.Nome.ToLower() == request.nome.ToLower());
 
             if (produtoExiste)
@@ -52,6 +52,36 @@ namespace controleEstoque.Services
                 quantidade = produtoEntity.Quantidade
             };
 
+        }
+
+        public async Task<List<ResponseModel>> FiltrarNomeAsync(string nome)
+        {
+            //Verifica todo produto com o nome digitado, podendo retornar mais de um. Como "Celular LG" e "Celular Samsung"
+            var produtosEncontrados = await _context.Produtos.Where(p => p.Nome.ToLower().Contains(nome.ToLower())).ToListAsync();
+
+            if (produtosEncontrados == null || produtosEncontrados.Count == 0)
+            {
+                //lança uma exceção caso o produto não exista no banco de dados
+                throw new InvalidOperationException("Produto não encontrado.");
+            }
+
+            //Retorna uma lista do tipo responseModel com os dados encontrados
+            var responseList = new List<ResponseModel>();
+
+            foreach (var produto in produtosEncontrados)
+            {
+                //inicializa e atribui os valores do responseModel com os dados encontrados
+                responseList.Add(new ResponseModel
+                {
+                    id = produto.Id,
+                    nome = produto.Nome,
+                    categoria = produto.Categoria,
+                    preco = produto.Preco,
+                    quantidade = produto.Quantidade
+                });
+            }
+            
+            return responseList;
         }
     }
 }

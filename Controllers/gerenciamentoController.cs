@@ -34,16 +34,27 @@ namespace controleEstoque.Controllers
             }
             catch(InvalidOperationException ex)
             {
-                return BadRequest(new { mensagem = ex.Message });
+                return BadRequest(new { sucesso = false, mensagem = ex.Message });
             }
         }
 
         [HttpGet("filtrarNome")]
         public async Task<IActionResult> FiltrarNome([FromQuery] string nome)
         {
-            var result = nome;
-
-            return Ok(new { sucesso = true, mensagem = $"Filtrando produtos pelo nome: {result}" });
+            if (string.IsNullOrEmpty(nome?.Trim()))
+            {
+                return BadRequest(new { sucesso = false, mensagem = "Nome inválido." });
+            }
+            try
+            {
+                var result = await _gerenciamentoService.FiltrarNomeAsync(nome);
+                return Ok(result);
+            }
+            catch(InvalidOperationException ex)
+            {
+                return BadRequest(new { sucesso = false, mensagem = ex.Message });
+            }
+            
         }
 
         [HttpGet("filtrarCategoria")]
