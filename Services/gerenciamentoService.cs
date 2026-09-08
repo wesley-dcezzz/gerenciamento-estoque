@@ -141,5 +141,21 @@ namespace controleEstoque.Services
                 quantidade = produtoEntity.Quantidade
             };
         }
+
+        public async Task<string> DeletarProdutoAsync(int id)
+        {
+            var produtoEntity = await _context.Produtos.FindAsync(id);
+            
+            if(produtoEntity == null)
+            {
+                throw new InvalidOperationException("Produto não encontrado! Exclusão não permitida.");
+            }
+
+            _context.Produtos.Remove(produtoEntity);
+
+            await _context.SaveChangesAsync();
+            
+            return "Produto excluído com sucesso.";
+        }
     }
 }

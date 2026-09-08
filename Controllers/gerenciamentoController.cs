@@ -96,8 +96,19 @@ namespace controleEstoque.Controllers
         [HttpDelete("deletarProduto")]
         public async Task<IActionResult> DeletarProduto(int id)
         {
-            var result = id;
-            return Ok(id);
+            if(id <= 0)
+            {
+                return BadRequest(new { sucesso = false, mensagem = "ID inválido! Produto não encontrado." });
+            }
+            try
+            {
+                var result = await _gerenciamentoService.DeletarProdutoAsync(id);
+                return Ok(result);
+            }
+            catch(InvalidOperationException ex)
+            {
+                return BadRequest(new { sucesso = false, mensagem = ex.Message } );
+            };
         }
     }
 }
